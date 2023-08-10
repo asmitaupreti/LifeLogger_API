@@ -10,9 +10,6 @@ namespace LifeLogger.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int EventID { get; set; }
-
-        
-        
         public string UserID { get; set; }
         // Navigation Property
          [ForeignKey("UserID")]

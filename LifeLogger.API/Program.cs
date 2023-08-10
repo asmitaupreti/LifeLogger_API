@@ -1,25 +1,12 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-using LifeLogger.DataAccess;
-using LifeLogger.Models;
+using LifeLogger.API.Extensions;
+using LifeLogger.DataAccess.DbInitializer;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
-
-builder.Services.AddDbContext<ApplicationDbContext>(option =>
-{
-   option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"));
- });
-
- builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
-
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddApplicationService(builder.Configuration);
+builder.Services.AddIdentityServiceExtensions(builder.Configuration);
 
 var app = builder.Build();
 
@@ -32,8 +19,28 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();
 
+SeedDatabase();
+
 app.Run();
+
+
+void SeedDatabase() {
+    try
+    {
+        using (var scope = app.Services.CreateScope()) {
+        var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+        dbInitializer.Initialize();
+    }
+    }
+    catch (Exception ex)
+    { 
+        Console.WriteLine($"Heyyyyyy seee this {ex}");
+    }
+    
+}

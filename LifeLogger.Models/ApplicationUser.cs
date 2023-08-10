@@ -13,7 +13,6 @@ namespace LifeLogger.Models
 		public string State { get; set; }
 		public string PostalCode { get; set; }
         public string ProfilePicturePath { get; set; }
-        public DateTime DateJoined { get; set; } = DateTime.Now;
-        public string Role { get; set; }
+        public DateTime DateJoined { get; set; } 
     }
 }
