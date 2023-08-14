@@ -64,22 +64,22 @@ namespace LifeLogger.DataAccess.DbInitializer
 
                 // After user is created , create event related to the user
 
-                var events = new List<LifeEvent>
+                var events = new List<LifeProject>
                 {
-                    new LifeEvent
+                    new LifeProject
                     {
                         UserID = user.Id,
-                        Title = "Master Graduate",
+                        Title = "Graduation",
                         Description = "To be a master graduate",
                         Location ="Deutschland",
                         StartTime = DateTime.Now,
                         IsPublic = false,
                         CreatedAt = DateTime.Now
                      },
-                    new LifeEvent
+                    new LifeProject
                     {
                         UserID = user.Id,
-                        Title = "New Job",
+                        Title = "Job",
                         Description = "To have a new good job",
                         Location ="Deutschland",
                         StartTime = DateTime.Now,
@@ -87,11 +87,11 @@ namespace LifeLogger.DataAccess.DbInitializer
                         CreatedAt = DateTime.Now
 
                     },
-                    new LifeEvent
+                    new LifeProject
                     {
                         UserID = user.Id,
-                        Title = "Be fit",
-                        Description = "To be able to exercise 3 times a week",
+                        Title = "Fitness",
+                        Description = "To be able to exercise",
                         Location ="Deutschland",
                         StartTime = DateTime.Now,
                         IsPublic = false,
@@ -99,7 +99,7 @@ namespace LifeLogger.DataAccess.DbInitializer
                     }
                 };
 
-                _db.LifeEvents.AddRangeAsync(events).GetAwaiter().GetResult();
+                _db.LifeProjects.AddRangeAsync(events).GetAwaiter().GetResult();
                 _db.SaveChangesAsync().GetAwaiter().GetResult();
             }
 

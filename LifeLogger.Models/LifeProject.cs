@@ -5,11 +5,12 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace LifeLogger.Models
 {
-    public class LifeEvent
+    public class LifeProject
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int EventID { get; set; }
+        public int ProjectId { get; set; }
+        
         public string UserID { get; set; }
         // Navigation Property
          [ForeignKey("UserID")]

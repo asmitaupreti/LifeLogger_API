@@ -164,10 +164,10 @@ namespace LifeLogger.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "LifeEvents",
+                name: "LifeProjects",
                 columns: table => new
                 {
-                    EventID = table.Column<int>(type: "int", nullable: false)
+                    ProjectId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserID = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Title = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
@@ -181,9 +181,9 @@ namespace LifeLogger.DataAccess.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LifeEvents", x => x.EventID);
+                    table.PrimaryKey("PK_LifeProjects", x => x.ProjectId);
                     table.ForeignKey(
-                        name: "FK_LifeEvents_AspNetUsers_UserID",
+                        name: "FK_LifeProjects_AspNetUsers_UserID",
                         column: x => x.UserID,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
@@ -229,8 +229,8 @@ namespace LifeLogger.DataAccess.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LifeEvents_UserID",
-                table: "LifeEvents",
+                name: "IX_LifeProjects_UserID",
+                table: "LifeProjects",
                 column: "UserID");
         }
 
@@ -253,7 +253,7 @@ namespace LifeLogger.DataAccess.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "LifeEvents");
+                name: "LifeProjects");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

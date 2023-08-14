@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LifeLogger.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230810104744_InitialMigration")]
+    [Migration("20230814123126_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -112,13 +112,13 @@ namespace LifeLogger.DataAccess.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("LifeLogger.Models.LifeEvent", b =>
+            modelBuilder.Entity("LifeLogger.Models.LifeProject", b =>
                 {
-                    b.Property<int>("EventID")
+                    b.Property<int>("ProjectId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EventID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProjectId"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -151,11 +151,11 @@ namespace LifeLogger.DataAccess.Migrations
                     b.Property<string>("UserID")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("EventID");
+                    b.HasKey("ProjectId");
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("LifeEvents");
+                    b.ToTable("LifeProjects");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -291,7 +291,7 @@ namespace LifeLogger.DataAccess.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("LifeLogger.Models.LifeEvent", b =>
+            modelBuilder.Entity("LifeLogger.Models.LifeProject", b =>
                 {
                     b.HasOne("LifeLogger.Models.ApplicationUser", "User")
                         .WithMany()

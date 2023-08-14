@@ -14,5 +14,8 @@ namespace LifeLogger.Models
 		public string PostalCode { get; set; }
         public string ProfilePicturePath { get; set; }
         public DateTime DateJoined { get; set; } 
+
+        [NotMapped]
+        public string Role { get; set; }
     }
 }
