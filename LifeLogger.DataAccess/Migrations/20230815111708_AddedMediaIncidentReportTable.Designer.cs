@@ -4,6 +4,7 @@ using LifeLogger.DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LifeLogger.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230815111708_AddedMediaIncidentReportTable")]
+    partial class AddedMediaIncidentReportTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,15 +27,15 @@ namespace LifeLogger.DataAccess.Migrations
 
             modelBuilder.Entity("LifeIncidentMedia", b =>
                 {
+                    b.Property<int>("IncidentID")
+                        .HasColumnType("int");
+
                     b.Property<int>("LifeIncidentsIncidentID")
                         .HasColumnType("int");
 
-                    b.Property<int>("MediaID")
-                        .HasColumnType("int");
+                    b.HasKey("IncidentID", "LifeIncidentsIncidentID");
 
-                    b.HasKey("LifeIncidentsIncidentID", "MediaID");
-
-                    b.HasIndex("MediaID");
+                    b.HasIndex("LifeIncidentsIncidentID");
 
                     b.ToTable("LifeIncidentMedia");
                 });
@@ -311,6 +314,9 @@ namespace LifeLogger.DataAccess.Migrations
                     b.Property<string>("Caption")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("IncidentID")
+                        .HasColumnType("int");
+
                     b.Property<string>("MediaUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -503,15 +509,15 @@ namespace LifeLogger.DataAccess.Migrations
 
             modelBuilder.Entity("LifeIncidentMedia", b =>
                 {
-                    b.HasOne("LifeLogger.Models.LifeIncident", null)
+                    b.HasOne("LifeLogger.Models.Media", null)
                         .WithMany()
-                        .HasForeignKey("LifeIncidentsIncidentID")
+                        .HasForeignKey("IncidentID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("LifeLogger.Models.Media", null)
+                    b.HasOne("LifeLogger.Models.LifeIncident", null)
                         .WithMany()
-                        .HasForeignKey("MediaID")
+                        .HasForeignKey("LifeIncidentsIncidentID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

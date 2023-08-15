@@ -1,10 +1,14 @@
+using System.Text.Json.Serialization;
 using LifeLogger.API.Extensions;
 using LifeLogger.DataAccess.DbInitializer;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+
+builder.Services.AddControllers().AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
 builder.Services.AddApplicationService(builder.Configuration);
 builder.Services.AddIdentityServiceExtensions(builder.Configuration);
 

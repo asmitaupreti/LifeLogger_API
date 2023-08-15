@@ -58,6 +58,19 @@ namespace LifeLogger.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Tags",
+                columns: table => new
+                {
+                    TagID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TagName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tags", x => x.TagID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -189,6 +202,60 @@ namespace LifeLogger.DataAccess.Migrations
                         principalColumn: "Id");
                 });
 
+            migrationBuilder.CreateTable(
+                name: "LifeMilestones",
+                columns: table => new
+                {
+                    MilestoneID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProjectID = table.Column<int>(type: "int", nullable: false),
+                    MilestoneName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Location = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    PeopleInvolved = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Sentiment = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    AchievementLevel = table.Column<int>(type: "int", nullable: true),
+                    RelatedLinks = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PrivateNotes = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    Weather = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    FinancialImpact = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LifeMilestones", x => x.MilestoneID);
+                    table.ForeignKey(
+                        name: "FK_LifeMilestones_LifeProjects_ProjectID",
+                        column: x => x.ProjectID,
+                        principalTable: "LifeProjects",
+                        principalColumn: "ProjectId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MilestoneTags",
+                columns: table => new
+                {
+                    MilestoneID = table.Column<int>(type: "int", nullable: false),
+                    TagID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MilestoneTags", x => new { x.MilestoneID, x.TagID });
+                    table.ForeignKey(
+                        name: "FK_MilestoneTags_LifeMilestones_MilestoneID",
+                        column: x => x.MilestoneID,
+                        principalTable: "LifeMilestones",
+                        principalColumn: "MilestoneID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MilestoneTags_Tags_TagID",
+                        column: x => x.TagID,
+                        principalTable: "Tags",
+                        principalColumn: "TagID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -229,9 +296,19 @@ namespace LifeLogger.DataAccess.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_LifeMilestones_ProjectID",
+                table: "LifeMilestones",
+                column: "ProjectID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_LifeProjects_UserID",
                 table: "LifeProjects",
                 column: "UserID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MilestoneTags_TagID",
+                table: "MilestoneTags",
+                column: "TagID");
         }
 
         /// <inheritdoc />
@@ -253,10 +330,19 @@ namespace LifeLogger.DataAccess.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "LifeProjects");
+                name: "MilestoneTags");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "LifeMilestones");
+
+            migrationBuilder.DropTable(
+                name: "Tags");
+
+            migrationBuilder.DropTable(
+                name: "LifeProjects");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

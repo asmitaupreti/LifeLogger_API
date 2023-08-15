@@ -13,8 +13,8 @@ namespace LifeLogger.Models
         
         public string UserID { get; set; }
         // Navigation Property
-         [ForeignKey("UserID")]
-         [ValidateNever]
+        [ForeignKey("UserID")]
+        [ValidateNever]
         public ApplicationUser User { get; set; }
 
         [Required]
@@ -40,7 +40,7 @@ namespace LifeLogger.Models
 
         public DateTime UpdatedAt { get; set; }
 
-
+        public virtual ICollection<LifeMilestone> LifeMilestones { get; set; }
         
     }
 

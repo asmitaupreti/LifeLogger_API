@@ -4,6 +4,7 @@ using LifeLogger.DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LifeLogger.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230815063947_AddedUserIdToLifeMileStoneTable")]
+    partial class AddedUserIdToLifeMileStoneTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,21 +24,6 @@ namespace LifeLogger.DataAccess.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("LifeIncidentMedia", b =>
-                {
-                    b.Property<int>("LifeIncidentsIncidentID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MediaID")
-                        .HasColumnType("int");
-
-                    b.HasKey("LifeIncidentsIncidentID", "MediaID");
-
-                    b.HasIndex("MediaID");
-
-                    b.ToTable("LifeIncidentMedia");
-                });
 
             modelBuilder.Entity("LifeLogger.Models.ApplicationUser", b =>
                 {
@@ -124,58 +112,6 @@ namespace LifeLogger.DataAccess.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("LifeLogger.Models.IncidentMediaMapping", b =>
-                {
-                    b.Property<int>("IncidentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MediaId")
-                        .HasColumnType("int");
-
-                    b.HasKey("IncidentId", "MediaId");
-
-                    b.HasIndex("MediaId");
-
-                    b.ToTable("IncidentMediaMappings");
-                });
-
-            modelBuilder.Entity("LifeLogger.Models.LifeIncident", b =>
-                {
-                    b.Property<int>("IncidentID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IncidentID"));
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<DateTime>("IncidentDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Location")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<int>("MilestoneID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Severity")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.HasKey("IncidentID");
-
-                    b.HasIndex("MilestoneID");
-
-                    b.ToTable("LifeIncidents");
-                });
-
             modelBuilder.Entity("LifeLogger.Models.LifeMilestone", b =>
                 {
                     b.Property<int>("MilestoneID")
@@ -224,6 +160,9 @@ namespace LifeLogger.DataAccess.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Weather")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -231,6 +170,8 @@ namespace LifeLogger.DataAccess.Migrations
                     b.HasKey("MilestoneID");
 
                     b.HasIndex("ProjectID");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("LifeMilestones");
                 });
@@ -281,61 +222,7 @@ namespace LifeLogger.DataAccess.Migrations
                     b.ToTable("LifeProjects");
                 });
 
-            modelBuilder.Entity("LifeLogger.Models.LifeReport", b =>
-                {
-                    b.Property<int>("ReportId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReportId"));
-
-                    b.Property<string>("ReportLink")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ReportType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ReportId");
-
-                    b.ToTable("LifeReports");
-                });
-
-            modelBuilder.Entity("LifeLogger.Models.Media", b =>
-                {
-                    b.Property<int>("MediaID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MediaID"));
-
-                    b.Property<string>("Caption")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MediaUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("MediaID");
-
-                    b.ToTable("Medias");
-                });
-
-            modelBuilder.Entity("LifeLogger.Models.MilestoneReportMapping", b =>
-                {
-                    b.Property<int>("MilestoneId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ReportId")
-                        .HasColumnType("int");
-
-                    b.HasKey("MilestoneId", "ReportId");
-
-                    b.HasIndex("ReportId");
-
-                    b.ToTable("MilestoneReportMappings");
-                });
-
-            modelBuilder.Entity("LifeLogger.Models.MilestoneTagMapping", b =>
+            modelBuilder.Entity("LifeLogger.Models.MilestoneTag", b =>
                 {
                     b.Property<int>("MilestoneID")
                         .HasColumnType("int");
@@ -347,7 +234,7 @@ namespace LifeLogger.DataAccess.Migrations
 
                     b.HasIndex("TagID");
 
-                    b.ToTable("MilestoneTagMappings");
+                    b.ToTable("MilestoneTags");
                 });
 
             modelBuilder.Entity("LifeLogger.Models.Tag", b =>
@@ -501,60 +388,21 @@ namespace LifeLogger.DataAccess.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("LifeIncidentMedia", b =>
-                {
-                    b.HasOne("LifeLogger.Models.LifeIncident", null)
-                        .WithMany()
-                        .HasForeignKey("LifeIncidentsIncidentID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LifeLogger.Models.Media", null)
-                        .WithMany()
-                        .HasForeignKey("MediaID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("LifeLogger.Models.IncidentMediaMapping", b =>
-                {
-                    b.HasOne("LifeLogger.Models.LifeIncident", "LifeIncident")
-                        .WithMany()
-                        .HasForeignKey("IncidentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LifeLogger.Models.Media", "Media")
-                        .WithMany()
-                        .HasForeignKey("MediaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LifeIncident");
-
-                    b.Navigation("Media");
-                });
-
-            modelBuilder.Entity("LifeLogger.Models.LifeIncident", b =>
-                {
-                    b.HasOne("LifeLogger.Models.LifeMilestone", "LifeMilestone")
-                        .WithMany("LifeIncidents")
-                        .HasForeignKey("MilestoneID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LifeMilestone");
-                });
-
             modelBuilder.Entity("LifeLogger.Models.LifeMilestone", b =>
                 {
                     b.HasOne("LifeLogger.Models.LifeProject", "LifeProject")
-                        .WithMany("LifeMilestones")
+                        .WithMany()
                         .HasForeignKey("ProjectID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("LifeLogger.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
                     b.Navigation("LifeProject");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("LifeLogger.Models.LifeProject", b =>
@@ -566,35 +414,16 @@ namespace LifeLogger.DataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("LifeLogger.Models.MilestoneReportMapping", b =>
+            modelBuilder.Entity("LifeLogger.Models.MilestoneTag", b =>
                 {
                     b.HasOne("LifeLogger.Models.LifeMilestone", "LifeMilestone")
-                        .WithMany("MilestoneReportMappings")
-                        .HasForeignKey("MilestoneId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LifeLogger.Models.LifeReport", "LifeReport")
-                        .WithMany("MilestoneReportMappings")
-                        .HasForeignKey("ReportId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LifeMilestone");
-
-                    b.Navigation("LifeReport");
-                });
-
-            modelBuilder.Entity("LifeLogger.Models.MilestoneTagMapping", b =>
-                {
-                    b.HasOne("LifeLogger.Models.LifeMilestone", "LifeMilestone")
-                        .WithMany("MilestoneTagMappings")
+                        .WithMany("MilestoneTags")
                         .HasForeignKey("MilestoneID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("LifeLogger.Models.Tag", "Tag")
-                        .WithMany("MilestoneTagMappings")
+                        .WithMany("MilestoneTags")
                         .HasForeignKey("TagID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -657,26 +486,12 @@ namespace LifeLogger.DataAccess.Migrations
 
             modelBuilder.Entity("LifeLogger.Models.LifeMilestone", b =>
                 {
-                    b.Navigation("LifeIncidents");
-
-                    b.Navigation("MilestoneReportMappings");
-
-                    b.Navigation("MilestoneTagMappings");
-                });
-
-            modelBuilder.Entity("LifeLogger.Models.LifeProject", b =>
-                {
-                    b.Navigation("LifeMilestones");
-                });
-
-            modelBuilder.Entity("LifeLogger.Models.LifeReport", b =>
-                {
-                    b.Navigation("MilestoneReportMappings");
+                    b.Navigation("MilestoneTags");
                 });
 
             modelBuilder.Entity("LifeLogger.Models.Tag", b =>
                 {
-                    b.Navigation("MilestoneTagMappings");
+                    b.Navigation("MilestoneTags");
                 });
 #pragma warning restore 612, 618
         }

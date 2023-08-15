@@ -16,7 +16,7 @@ namespace LifeLogger.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetAllLifeEvents(string id) 
+        public async Task<IActionResult> GetAllLifeProjects(string id) 
         { 
             try
             {
@@ -39,7 +39,7 @@ namespace LifeLogger.API.Controllers
         }
 
         [HttpGet("{id}/{projectId:int}")]
-        public async Task<IActionResult> GetLifeEvent(string id, int projectId ) 
+        public async Task<IActionResult> GetLifeProject(string id, int projectId ) 
         { 
              try
             {
@@ -62,7 +62,7 @@ namespace LifeLogger.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateLifeEvent([FromBody] LifeProject lifeProject) 
+        public async Task<IActionResult> CreateLifeProject([FromBody] LifeProject lifeProject) 
         { 
              try
             {
@@ -91,7 +91,7 @@ namespace LifeLogger.API.Controllers
         }
 
         [HttpPut("{id}/{projectId:int}")]
-        public async Task<IActionResult> EditLifeEvent(string id, int projectId ,[FromBody] LifeProject lifeProject )
+        public async Task<IActionResult> EditLifeProject(string id, int projectId ,[FromBody] LifeProject lifeProject )
          { 
             try
             {
@@ -122,7 +122,7 @@ namespace LifeLogger.API.Controllers
          }
 
         [HttpDelete("{id}/{projectId:int}")]
-        public async Task<IActionResult> DeleteLifeEvent(string id, int projectId ) 
+        public async Task<IActionResult> DeleteLifeProject(string id, int projectId ) 
         { 
             try
             {
