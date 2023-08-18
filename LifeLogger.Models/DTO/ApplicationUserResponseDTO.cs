@@ -1,20 +1,19 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Identity;
 
-namespace LifeLogger.Models
+namespace LifeLogger.Models.DTO
 {
-    public class ApplicationUser:IdentityUser {
-
-		[Required]
+    public class ApplicationUserResponseDTO
+    {
+        public string Id { get; set; }
         public string Name { get; set; }
+        public string UserName { get; set; }
+        public string Email { get; set; }
 		public string StreetAddress { get; set; }
 		public string City { get; set; }
 		public string State { get; set; }
 		public string PostalCode { get; set; }
+        public string PhoneNumber{ get; set; }
         public string ProfilePicturePath { get; set; }
         public DateTime DateJoined { get; set; } 
-        [NotMapped]
         public string Role { get; set; }
     }
 }

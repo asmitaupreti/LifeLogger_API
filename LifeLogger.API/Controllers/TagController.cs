@@ -1,6 +1,7 @@
 
 using LifeLogger.DataAccess.Data;
 using LifeLogger.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ namespace LifeLogger.API.Controllers
 {
     [Route("api/Tag")]
     [ApiController]
+    [Authorize]
     public class TagController:Controller
     {
         private readonly ApplicationDbContext _db;

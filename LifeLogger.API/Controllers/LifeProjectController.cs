@@ -1,5 +1,6 @@
 using LifeLogger.DataAccess.Data;
 using LifeLogger.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,6 +8,7 @@ namespace LifeLogger.API.Controllers
 {
     [Route("api/LifeProject")]
     [ApiController]
+    [Authorize]
     public class LifeProjectController:Controller
     {
         private readonly ApplicationDbContext _db;

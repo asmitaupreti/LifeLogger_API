@@ -1,7 +1,5 @@
-using System.Text.Json.Serialization;
 using LifeLogger.API.Extensions;
 using LifeLogger.DataAccess.DbInitializer;
-using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +9,7 @@ builder.Services.AddControllers().AddNewtonsoftJson(x => x.SerializerSettings.Re
 
 builder.Services.AddApplicationService(builder.Configuration);
 builder.Services.AddIdentityServiceExtensions(builder.Configuration);
-
+builder.Services.AddSwaggerService();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -28,6 +26,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.AddGlobalExceptionMiddleware();
 
 SeedDatabase();
 

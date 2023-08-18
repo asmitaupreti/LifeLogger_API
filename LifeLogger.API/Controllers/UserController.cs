@@ -1,26 +1,35 @@
-using System;
+using System.Net;
+using AutoMapper;
 using LifeLogger.DataAccess.Data;
 using LifeLogger.Models;
+using LifeLogger.Models.DTO;
 using LifeLogger.Utility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using LifeLogger.API.Middleware.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LifeLogger.API.Controllers
 {
-    [Route("api/UserAuth")]
+    [Route("api/User")]
     [ApiController]
+    [Authorize(Roles = SD.Role_Admin)]
     public class UserController: Controller
     {
+        protected APIResponse _response;
         private readonly ApplicationDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
-
         private readonly RoleManager<IdentityRole> _roleManager;
-        public UserController(ApplicationDbContext db,UserManager<ApplicationUser> userManager,RoleManager<IdentityRole> roleManager)
+        private readonly IMapper _mapper;
+
+        public UserController(ApplicationDbContext db,UserManager<ApplicationUser> userManager,RoleManager<IdentityRole> roleManager, IMapper mapper)
         {
             _db = db;
             _userManager = userManager;
             _roleManager = roleManager;
+            _mapper = mapper;
+            _response = new();
         }
 
          private string FindRole(string userRole)
@@ -36,124 +45,156 @@ namespace LifeLogger.API.Controllers
                 case SD.Role_Collaborator:
                     return SD.Role_Collaborator;
                     
-                default: return SD.Role_Admin;
+                default: return SD.Role_User;
             }
          }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllUser()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<APIResponse>> GetAllUser()
         {
-            try
-            {
-                IEnumerable<ApplicationUser> applicationUserList =  await _db.ApplicationUsers.ToListAsync();
-                return Ok(applicationUserList);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Exception GetAllUser:{ex}");
-                return BadRequest();
+                IEnumerable<ApplicationUser> applicationUserList = await _userManager.Users.ToListAsync();
+                foreach (var user in applicationUserList)
+                {
+                    var role = await _userManager.GetRolesAsync(user);
+                    user.Role = role.FirstOrDefault();
+                }
+                 _response.Result = _mapper.Map<List<ApplicationUserResponseDTO>>(applicationUserList);
+                 _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+        }
+
+        [HttpGet("{id}", Name ="GetUser")]
+        public async Task<ActionResult<APIResponse>> GetUser(string id)
+        {
+           
+                ApplicationUser user = await _db.ApplicationUsers.Where( u=> u.Id ==id).FirstOrDefaultAsync();
+                if(user == null){
+                       
+                        throw new NotFoundException("User doesnot exist");
+                       
+                } 
+                else{
+                    user.Role = _userManager.GetRolesAsync(user).GetAwaiter().GetResult().FirstOrDefault();
+                    _response.Result = _mapper.Map<ApplicationUserResponseDTO>(user);
+                    _response.StatusCode = HttpStatusCode.OK;
+                    return Ok(_response);
+                } 
                 
-            }
+            
            
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetUser(string id)
-        {
-            try
-            {
-                ApplicationUser user = await _db.ApplicationUsers.Where( u=> u.Id ==id).FirstOrDefaultAsync();
-                return Ok(user);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Exception GetUser:{ex}");
-                return BadRequest();
-                
-            }
-        }
-
         [HttpPost]
-        public async Task<IActionResult> CreateUser([FromBody]ApplicationUser applicationUser)
-        {
-            try
-            {
-                var user = await _db.ApplicationUsers.FirstOrDefaultAsync(u => u.UserName == applicationUser.UserName);
-                if(user!= null)
-                    return BadRequest();
-                else
-                {
-                    var result = await _userManager.CreateAsync(applicationUser, "Test123*");
-                    if(!_roleManager.RoleExistsAsync(SD.Role_Admin).GetAwaiter().GetResult())
+        public async Task<ActionResult<APIResponse>> CreateUser([FromBody]ApplicationUserCreateDTO applicationUserCreateDTO)
+        {         
+                    var user = await _db.ApplicationUsers.FirstOrDefaultAsync(u => u.UserName == applicationUserCreateDTO.UserName);
+                    if(user!= null){
+                       throw new BadRequestException("User already exist");
+                    }    
+                    else
                     {
-                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin));
-                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_User));
-                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_Collaborator));
-                    }
-                    await _userManager.AddToRoleAsync(applicationUser, FindRole(applicationUser.Role));
-                    var userToReturn = await _db.ApplicationUsers.FirstOrDefaultAsync(u => u.UserName == applicationUser.UserName);
-                    return Ok(userToReturn);
-                } 
-             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Exception CreateUser:{ex}");
-                return BadRequest();
+                        ApplicationUser applicationUser = _mapper.Map<ApplicationUser>(applicationUserCreateDTO);
+                        await _userManager.CreateAsync(applicationUser, applicationUserCreateDTO.Password);
+                        if(!_roleManager.RoleExistsAsync(SD.Role_Admin).GetAwaiter().GetResult())
+                        {
+                            await _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin));
+                            await _roleManager.CreateAsync(new IdentityRole(SD.Role_User));
+                            await _roleManager.CreateAsync(new IdentityRole(SD.Role_Collaborator));
+                        }
+                        await _userManager.AddToRoleAsync(applicationUser, FindRole(applicationUser.Role));
+                        _response.Result = _mapper.Map<ApplicationUserResponseDTO>(applicationUser);
+                        _response.StatusCode = HttpStatusCode.Created;
+                        return CreatedAtRoute("GetUser", new { id = applicationUser.Id }, _response);
+                     } 
                 
-            }
+                
+             
                 
          }
 
         
             
         [HttpPut("{id}")]
-        public async Task<IActionResult> EditUser(string id, [FromBody]ApplicationUser applicationUser)
+        public async Task<ActionResult<APIResponse>> EditUser(string id, [FromBody]ApplicationUserUpdateDTO applicationUserUpdateDTO)
         {
             try
             {
 
-                if(id != applicationUser.Id)
+                if(applicationUserUpdateDTO == null || id != applicationUserUpdateDTO.Id )
                 {
-                    return BadRequest();
+                    _response.IsSuccess = false;
+                    _response.ErrorMessage = new List<string>() {"Please make sure you are sending correct data"};
+                    
+                    return BadRequest(_response);
                 }
-
-                var user = await _userManager.FindByIdAsync(applicationUser.Id);
-                
-                if(user == null)
-                    return BadRequest();
                 else
                 {
-                    user.Name =  applicationUser.Name;
-                    user.City = applicationUser.City;
-                    user.StreetAddress = applicationUser.StreetAddress;
-                    user.PostalCode = applicationUser.PostalCode;
-                    user.State = applicationUser.State;
-                    var result = await _userManager.UpdateAsync(user);
-                    return Ok(result);
+                    var oldUser = await _userManager.FindByIdAsync(applicationUserUpdateDTO.Id);
+                    if(oldUser == null){
+                        _response.IsSuccess = false;
+                        _response.ErrorMessage = new List<string>() { "User doesnot exist"};
+                        return BadRequest(ModelState);
+                    }
+                    
+                    if(applicationUserUpdateDTO.Role != oldUser.Role)
+                    {  
+                        var OldRoles = await _userManager.GetRolesAsync(oldUser);
+                        await _userManager.RemoveFromRolesAsync(oldUser, OldRoles);
+                        await _userManager.AddToRoleAsync(oldUser, FindRole(applicationUserUpdateDTO.Role));
+                    }
+                     await _userManager.UpdateAsync(_mapper.Map<ApplicationUserUpdateDTO, ApplicationUser>(applicationUserUpdateDTO, oldUser));
+                    _response.StatusCode = HttpStatusCode.NoContent;
+                    _response.IsSuccess = true;
+                    return Ok(_response);
+                   
                 } 
              }
             catch (Exception ex)
             {
-                Console.WriteLine($"Exception CreateUser:{ex}");
-                return BadRequest();
+                _response.IsSuccess = false;
+                _response.ErrorMessage = new List<string>() { ex.ToString() };
                 
             }
+             return _response;
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(string id)
+        public async Task<ActionResult<APIResponse>> DeleteUser(string id)
         {
-            var user = await _userManager.FindByIdAsync(id);
-            if (user != null)
+            try
             {
-                IdentityResult result = await _userManager.DeleteAsync(user);
-                if (result.Succeeded)
-                    return Ok();
+                var user = await _userManager.FindByIdAsync(id);
+                if (user != null)
+                {
+                    IdentityResult result = await _userManager.DeleteAsync(user);
+                    if (result.Succeeded)
+                    {
+                        _response.StatusCode = HttpStatusCode.NoContent;
+                        _response.IsSuccess = true;
+                         return Ok(_response);
+                    }
+                    else
+                    {
+                        _response.IsSuccess = false;
+                        _response.ErrorMessage = new List<string>() {"User couldnot be deleted"};
+                        return BadRequest(_response);
+                    }                      
+                }
                 else
-                    return BadRequest();
+                {
+                    _response.IsSuccess = false;
+                    _response.ErrorMessage = new List<string>() {"User doesnot exist"};
+                    return BadRequest(_response);
+                }
             }
-            else
-               return BadRequest();
+             catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorMessage = new List<string>() { ex.ToString() };
+                
+            }
+             return _response; 
         }
     }
 }
