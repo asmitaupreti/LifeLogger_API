@@ -8,6 +8,6 @@ namespace LifeLogger.Models.DTO
     public class LoginResponseDTO
     {
         public ApplicationUserResponseDTO User{ get; set; }
-        public string Token{ get; set; }
+        public TokenDTO Token{ get; set; }
     }
 }

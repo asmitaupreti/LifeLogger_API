@@ -30,5 +30,7 @@ namespace LifeLogger.Models.DTO
         public string FinancialImpact { get; set; }
 
         public string Description { get; set; }
+
+        public int LifeIncidentCount{ get; set; }
     }
 }

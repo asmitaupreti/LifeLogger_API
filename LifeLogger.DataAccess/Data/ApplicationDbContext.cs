@@ -30,6 +30,7 @@ namespace LifeLogger.DataAccess.Data
 
         public DbSet<MilestoneReportMapping> MilestoneReportMappings{get;set;}
 
+        public DbSet<RefreshToken> RefreshTokens{get;set;}
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)    
         {                     
@@ -43,6 +44,27 @@ namespace LifeLogger.DataAccess.Data
 
              modelBuilder.Entity<MilestoneReportMapping>()             
                 .HasKey(x => new {x.MilestoneId, x.ReportId});
-        }   
+        }  
+
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var entries = ChangeTracker
+                .Entries()
+                .Where(e => e.Entity is BaseEntity && (
+                        e.State == EntityState.Added
+                        || e.State == EntityState.Modified));
+
+            foreach (var entityEntry in entries)
+            {
+                ((BaseEntity)entityEntry.Entity).UpdatedDate = DateTime.Now;
+
+                if (entityEntry.State == EntityState.Added)
+                {
+                    ((BaseEntity)entityEntry.Entity).CreatedDate = DateTime.Now;
+                }
+            }
+
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        }
     }
 }

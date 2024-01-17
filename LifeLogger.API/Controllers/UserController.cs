@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using LifeLogger.API.Middleware.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 
+
 namespace LifeLogger.API.Controllers
 {
     [Route("api/User")]
@@ -48,7 +49,7 @@ namespace LifeLogger.API.Controllers
                 default: return SD.Role_User;
             }
          }
-
+[Route("api/User/GetAllUser")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<APIResponse>> GetAllUser()
@@ -62,6 +63,19 @@ namespace LifeLogger.API.Controllers
                  _response.Result = _mapper.Map<List<ApplicationUserResponseDTO>>(applicationUserList);
                  _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
+        }
+        internal Task<ApplicationUser> GetCurrentUserAsync() => _userManager.GetUserAsync(HttpContext.User);
+
+        [Route("api/User/GetCurrentUser")]
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<APIResponse>> GetCurrentUser()
+        {
+                ApplicationUser user = await GetCurrentUserAsync();
+                user.Role = _userManager.GetRolesAsync(user).GetAwaiter().GetResult().FirstOrDefault();
+		           _response.Result = _mapper.Map<ApplicationUserResponseDTO>(user);
+                    _response.StatusCode = HttpStatusCode.OK;
+                    return Ok(_response);
         }
 
         [HttpGet("{id}", Name ="GetUser")]

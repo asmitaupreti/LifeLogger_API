@@ -1,7 +1,9 @@
 
 
+using AutoMapper;
 using LifeLogger.DataAccess.Data;
 using LifeLogger.Models;
+using LifeLogger.Models.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,10 +16,11 @@ namespace LifeLogger.API.Controllers
     public class LifeMilestoneController:Controller
     {
         private readonly ApplicationDbContext _db;
-
-        public LifeMilestoneController(ApplicationDbContext db)
+        private readonly IMapper _mapper;
+        public LifeMilestoneController(ApplicationDbContext db,IMapper mapper)
         {
             _db = db;
+            _mapper = mapper;
         }
 
         [HttpGet("{projectId:int}")]
@@ -25,10 +28,15 @@ namespace LifeLogger.API.Controllers
         { 
             try
             {
-                IEnumerable<LifeMilestone> LifeMilestones = await _db.LifeMilestones.Where(u => u.ProjectID== projectId ).ToListAsync();
-                if(LifeMilestones!= null && LifeMilestones.Count()> 0)
+                IEnumerable<LifeMilestone> lifeMilestones = await _db.LifeMilestones.Include(x=> x.LifeIncidents).Where(u => u.ProjectID== projectId ).ToListAsync();
+                if(lifeMilestones!= null || lifeMilestones.Count()> 0)
                 {
-                    return Ok(LifeMilestones);
+                    IEnumerable<LifeMilestoneResponseDTO> milestones = _mapper.Map<IEnumerable<LifeMilestoneResponseDTO>>(lifeMilestones);
+                    foreach (var item in milestones)
+                    {
+                        item.LifeIncidentCount = lifeMilestones.Where(x => x.MilestoneID == item.MilestoneID).FirstOrDefault().LifeIncidents.Count();
+                    }
+                    return Ok(milestones);
                 }
                 else
                 {
@@ -68,13 +76,23 @@ namespace LifeLogger.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateLifeMilestone([FromBody] LifeMilestone lifeMilestone) 
+        public async Task<IActionResult> CreateLifeMilestone([FromBody] LifeMilestoneCreateDTO lifeMilestone) 
         { 
              try
             {
-                    await _db.LifeMilestones.AddAsync(lifeMilestone);
-                    await _db.SaveChangesAsync();
-                    return Ok(lifeMilestone);
+                if(lifeMilestone!= null){
+                     var project = await _db.LifeProjects.Where( u=> u.ProjectId ==lifeMilestone.ProjectID).FirstOrDefaultAsync();
+                    if(project== null)
+                        return BadRequest();
+                    LifeMilestone milestone = _mapper.Map<LifeMilestone>(lifeMilestone);
+                    await _db.LifeMilestones.AddAsync(milestone);
+                    await _db.SaveChangesAsync();     
+                    return Ok();
+                }
+                   else
+                {
+                    return BadRequest();
+                } 
                
             
             }
@@ -86,7 +104,7 @@ namespace LifeLogger.API.Controllers
         }
 
         [HttpPut("{projectId:int}/{lifeMilestoneId:int}")]
-        public async Task<IActionResult> EditLifeMilestone( int projectId ,int lifeMilestoneId,[FromBody] LifeMilestone lifeMilestone )
+        public async Task<IActionResult> EditLifeMilestone( int projectId ,int lifeMilestoneId,[FromBody] LifeMilestoneUpdateDTO lifeMilestone )
          { 
             try
             {
@@ -94,12 +112,13 @@ namespace LifeLogger.API.Controllers
                                                             .FirstOrDefaultAsync();
                 if(lifeMileStoneToUpdate!= null && projectId==lifeMilestone.ProjectID)
                 {
-                    lifeMileStoneToUpdate.MilestoneName = lifeMilestone.MilestoneName;
-                    lifeMileStoneToUpdate.Date = lifeMilestone.Date;
-                    lifeMileStoneToUpdate.Location = lifeMilestone.Location;
-                    lifeMileStoneToUpdate.Sentiment = lifeMilestone.Sentiment;
-                    lifeMileStoneToUpdate.Description = lifeMilestone.Description;
-                    _db.LifeMilestones.Update(lifeMileStoneToUpdate);
+                    
+                    // lifeMileStoneToUpdate.MilestoneName = lifeMilestone.MilestoneName;
+                    // lifeMileStoneToUpdate.Date = lifeMilestone.Date;
+                    // lifeMileStoneToUpdate.Location = lifeMilestone.Location;
+                    // lifeMileStoneToUpdate.Sentiment = lifeMilestone.Sentiment;
+                    // lifeMileStoneToUpdate.Description = lifeMilestone.Description;
+                    _db.LifeMilestones.Update(_mapper.Map<LifeMilestoneUpdateDTO, LifeMilestone>(lifeMilestone, lifeMileStoneToUpdate));
                     await _db.SaveChangesAsync();
                     return Ok();
                 }
@@ -108,10 +127,10 @@ namespace LifeLogger.API.Controllers
                     return BadRequest();
                 }
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
 
-                return BadRequest();
+                return BadRequest(ex);
             }; 
          }
 

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace LifeLogger.Models
 {
-    public class LifeProject
+    public class LifeProject: BaseEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -36,9 +36,9 @@ namespace LifeLogger.Models
         public bool IsPublic { get; set; }
 
 
-        public DateTime CreatedAt { get; set; }
+        // public DateTime CreatedAt { get; set; }
 
-        public DateTime UpdatedAt { get; set; }
+        // public DateTime UpdatedAt { get; set; }
 
         public virtual ICollection<LifeMilestone> LifeMilestones { get; set; }
         

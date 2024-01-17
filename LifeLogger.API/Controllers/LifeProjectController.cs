@@ -1,5 +1,7 @@
+using AutoMapper;
 using LifeLogger.DataAccess.Data;
 using LifeLogger.Models;
+using LifeLogger.Models.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,9 +14,11 @@ namespace LifeLogger.API.Controllers
     public class LifeProjectController:Controller
     {
         private readonly ApplicationDbContext _db;
-        public LifeProjectController(ApplicationDbContext db)
+        private readonly IMapper _mapper;
+        public LifeProjectController(ApplicationDbContext db,IMapper mapper)
         {
             _db = db;
+            _mapper = mapper;
         }
 
         [HttpGet("{id}")]
@@ -22,20 +26,27 @@ namespace LifeLogger.API.Controllers
         { 
             try
             {
-                IEnumerable<LifeProject> lifeProjects = await _db.LifeProjects.Where(u => u.UserID == id).ToListAsync();
-                if(lifeProjects!= null && lifeProjects.Count()> 0)
-                {
-                    return Ok(lifeProjects);
+                IEnumerable<LifeProject> lifeProjects = await _db.LifeProjects.Include(p => p.LifeMilestones).Where(u => u.UserID == id).ToListAsync();
+                if(lifeProjects!= null || lifeProjects.Count()> 0)
+                { 
+                    IEnumerable<LifeProjectResponseDTO> projects = _mapper.Map<IEnumerable<LifeProjectResponseDTO>>(lifeProjects);
+                    
+                    foreach (var item in projects)
+                    {
+                        item.LifeMileStoneCount = lifeProjects.Where(x => x.ProjectId == item.ProjectId).FirstOrDefault().LifeMilestones.Count();
+                    }
+                    
+                    return Ok(projects);
                 }
                 else
                 {
                     return BadRequest();
                 }
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
-
-                return BadRequest();
+                Console.WriteLine(ex);
+                return BadRequest(ex);
             }
             
         }
@@ -64,7 +75,7 @@ namespace LifeLogger.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateLifeProject([FromBody] LifeProject lifeProject) 
+        public async Task<IActionResult> CreateLifeProject([FromBody] LifeProjectCreateDTO lifeProject) 
         { 
              try
             {
@@ -75,8 +86,8 @@ namespace LifeLogger.API.Controllers
                      var user = await _db.ApplicationUsers.Where( u=> u.Id ==lifeProject.UserID).FirstOrDefaultAsync();
                     if(user== null)
                         return BadRequest();
-
-                    await _db.LifeProjects.AddAsync(lifeProject);
+                    LifeProject project = _mapper.Map<LifeProject>(lifeProject);
+                    await _db.LifeProjects.AddAsync(project);
                     await _db.SaveChangesAsync();
                     return Ok(lifeProject);
                 }
@@ -92,22 +103,15 @@ namespace LifeLogger.API.Controllers
             }; 
         }
 
-        [HttpPut("{id}/{projectId:int}")]
-        public async Task<IActionResult> EditLifeProject(string id, int projectId ,[FromBody] LifeProject lifeProject )
+        [HttpPut("{projectId:int}")]
+        public async Task<IActionResult> EditLifeProject(int projectId ,[FromBody] LifeProjectUpdateDTO lifeProject )
          { 
             try
             {
-                LifeProject project = await _db.LifeProjects.Where(u => u.UserID == id && u.ProjectId == projectId).FirstOrDefaultAsync();
+                LifeProject project = await _db.LifeProjects.Where(u => u.UserID == lifeProject.UserID && u.ProjectId == projectId).FirstOrDefaultAsync();
                 if(project!= null && projectId==lifeProject.ProjectId)
                 {
-                    project.Title = lifeProject.Title;
-                    project.Description = lifeProject.Description;
-                    project.IsPublic = lifeProject.IsPublic;
-                    project.StartTime = DateTime.Now;
-                    project.EndTime = DateTime.Now;
-                    project.UpdatedAt = DateTime.Now;
-                    project.Location = lifeProject.Location;
-                    _db.LifeProjects.Update(project);
+                    _db.LifeProjects.Update(_mapper.Map<LifeProjectUpdateDTO, LifeProject>(lifeProject, project));
                     await _db.SaveChangesAsync();
                     return Ok(project);
                 }

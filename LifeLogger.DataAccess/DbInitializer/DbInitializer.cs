@@ -74,7 +74,7 @@ namespace LifeLogger.DataAccess.DbInitializer
                         Location ="Deutschland",
                         StartTime = DateTime.Now,
                         IsPublic = false,
-                        CreatedAt = DateTime.Now
+                        
                      },
                     new LifeProject
                     {
@@ -84,7 +84,7 @@ namespace LifeLogger.DataAccess.DbInitializer
                         Location ="Deutschland",
                         StartTime = DateTime.Now,
                         IsPublic = false,
-                        CreatedAt = DateTime.Now
+                       
 
                     },
                     new LifeProject
@@ -95,7 +95,7 @@ namespace LifeLogger.DataAccess.DbInitializer
                         Location ="Deutschland",
                         StartTime = DateTime.Now,
                         IsPublic = false,
-                        CreatedAt = DateTime.Now
+                        
                     }
                 };
 

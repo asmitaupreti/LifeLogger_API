@@ -3,6 +3,24 @@ using LifeLogger.DataAccess.DbInitializer;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//CORS policy 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy",
+                      policy  =>
+                      {
+                          policy.WithOrigins("http://localhost:5173",
+                            "http://localhost:5174",
+                            "http://127.0.0.1:5173",
+                            "https://*.example.com"
+                            )
+                            .SetIsOriginAllowedToAllowWildcardSubdomains()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+
+                      });
+});
+
 // Add services to the container.
 
 builder.Services.AddControllers().AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
@@ -19,8 +37,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
+// app.UseHttpsRedirection();
+app.UseCors("CorsPolicy");
 app.UseAuthentication();
 
 app.UseAuthorization();

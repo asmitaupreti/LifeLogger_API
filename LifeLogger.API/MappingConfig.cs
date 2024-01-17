@@ -17,8 +17,12 @@ namespace LifeLogger.API
             CreateMap<LifeProject, LifeProjectResponseDTO>().ReverseMap();
 
             CreateMap<LifeMilestone, LifeMilestoneCreateDTO>().ReverseMap();
-            CreateMap<LifeProject, LifeMilestoneUpdateDTO>().ReverseMap();
-            CreateMap<LifeProject, LifeMilestoneResponseDTO>().ReverseMap();
+            CreateMap<LifeMilestone, LifeMilestoneUpdateDTO>().ReverseMap();
+            CreateMap<LifeMilestone, LifeMilestoneResponseDTO>().ReverseMap();
+
+             CreateMap<LifeIncident, LifeIncidentCreateDTO>().ReverseMap();
+            CreateMap<LifeIncident, LifeIncidentUpdateDTO>().ReverseMap();
+            CreateMap<LifeIncident, LifeIncidentResponseDTO>().ReverseMap();
 
             CreateMap<Tag, TagCreateDTO>().ReverseMap();
             CreateMap<Tag, TagUpdateDTO>().ReverseMap();

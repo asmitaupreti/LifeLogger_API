@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace LifeLogger.Models
 {
-    public class Tag
+    public class Tag:BaseEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

@@ -23,8 +23,6 @@ namespace LifeLogger.Models.DTO
         [Required(ErrorMessage = "IsPublic field shouldnot be empty")]
         public bool IsPublic { get; set; }
 
-        public DateTime CreatedAt { get; set; }
-
-        public DateTime UpdatedAt { get; set; }
+      
     }
 }
